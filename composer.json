@@ -1,5 +1,5 @@
 {
-    "name": "entora/ff-silex-less-provider",
+    "name": "darklow/ff-silex-less-provider",
     "type": "library",
     "description": "Simple less php service provider for Silex",
     "keywords": ["silex", "less", "lessphp", "provider"],
