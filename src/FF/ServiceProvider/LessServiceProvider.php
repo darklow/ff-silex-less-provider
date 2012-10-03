@@ -24,13 +24,17 @@ class LessServiceProvider implements ServiceProviderInterface
 			throw new \Exception("Target file directory \"$targetDir\" is not writable");
 		}
 
-		$targetContent = '';
+		$targetContent   = '';
+		$needToRecompile = false;
 		!is_array($sources) and $sources = array($sources);
 		foreach ($sources as $source) {
 			if (!file_exists($source)) {
 				throw new \Exception('Could not find less source dir or file "'.$source.'"');
 			}
-			if ($this->targetNeedsRecompile($source, $target)) {
+			if (!$needToRecompile) {
+				$needToRecompile = $this->targetNeedsRecompile($source, $target);
+			}
+			if ($needToRecompile) {
 				$handle = new \lessc($source);
 				$targetContent .= $handle->parse();
 			}
@@ -47,8 +51,19 @@ class LessServiceProvider implements ServiceProviderInterface
 
 	private function targetNeedsRecompile($source, $target)
 	{
-		if (!file_exists($target) || filemtime($source) > filemtime($target)) {
+		if (!file_exists($target)) {
 			return true;
+		}
+
+		$sourceDir   = dirname($source);
+		$targetMtime = filemtime($target);
+		foreach (new \DirectoryIterator($sourceDir) as $lessFile) {
+			/** @var $lessFile \DirectoryIterator */
+			if ($lessFile->isFile() && substr($lessFile->getFilename(), -5) === '.less') {
+				if ($lessFile->getMTime() > $targetMtime) {
+					return true;
+				}
+			}
 		}
 	}
 }
