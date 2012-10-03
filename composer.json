@@ -1,0 +1,25 @@
+{
+    "name": "entora/ff-silex-less-provider",
+    "type": "library",
+    "description": "Simple less php service provider for Silex",
+    "keywords": ["silex", "less", "lessphp", "provider"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kaspars Sprogis",
+            "email": "darklow@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+	    "silex/silex": "1.0.*",
+	    "leafo/lessphp": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "FF": "src"
+        }
+    },
+    "minimum-stability": "dev"
+}
