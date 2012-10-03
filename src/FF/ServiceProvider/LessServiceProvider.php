@@ -48,7 +48,6 @@ class LessServiceProvider implements ServiceProviderInterface
 	private function targetNeedsRecompile($source, $target)
 	{
 		if (!file_exists($target) || filemtime($source) > filemtime($target)) {
-			var_dump('rec');
 			return true;
 		}
 	}
