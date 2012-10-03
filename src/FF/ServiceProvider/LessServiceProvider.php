@@ -42,7 +42,10 @@ class LessServiceProvider implements ServiceProviderInterface
 
 		if (isset($handle)) {
 			if ($targetContent) {
-				file_put_contents($target, $targetContent, isset($app['less.target_mode']) ? $app['less.target_mode'] : null);
+				file_put_contents($target, $targetContent);
+				if(isset($app['less.target_mode'])){
+					chmod($target, $app['less.target_mode']);
+				}
 			} else {
 				throw new \Exception("No content after parsing less source files. Please check your .less files");
 			}
