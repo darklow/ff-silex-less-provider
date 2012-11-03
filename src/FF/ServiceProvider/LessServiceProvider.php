@@ -14,14 +14,14 @@ class LessServiceProvider implements ServiceProviderInterface
 	 *
 	 * @var string
 	 */
-	const CLASSIC    = 'classic';
+	const FORMATTER_CLASSIC    = 'classic';
 
 	/**
 	 * Value for compressed CSS generated from LESS source files.
 	 *
 	 * @var string
 	 */
-	const COMPRESSED = 'compressed';
+	const FORMATTER_COMPRESSED = 'compressed';
 
 	public function register(Application $app)
 	{
@@ -33,7 +33,7 @@ class LessServiceProvider implements ServiceProviderInterface
 		$this->validate($app);
 
 		// Define default formatter if not already set.
-		$formatter = isset($app['less.formatter']) ? $app['less.formatter'] : self::CLASSIC;
+		$formatter = isset($app['less.formatter']) ? $app['less.formatter'] : self::FORMATTER_CLASSIC;
 		$sources   = $app['less.sources'];
 		$target    = $app['less.target'];
 
@@ -47,7 +47,7 @@ class LessServiceProvider implements ServiceProviderInterface
 			}
 			if ($needToRecompile) {
 				$handle = new \lessc($source);
-				$handle->setFormatter($formattar);
+				$handle->setFormatter($formatter);
 				$targetContent .= $handle->parse();
 			}
 		}
@@ -99,7 +99,7 @@ class LessServiceProvider implements ServiceProviderInterface
 	/**
 	 * Validate application settings.
 	 *
-	 * @param Silex\Application $app
+	 * @param \Silex\Application $app
 	 *   Application to validate
 	 *
 	 * @throws \Exception
@@ -118,7 +118,7 @@ class LessServiceProvider implements ServiceProviderInterface
 		}
 
 		// Validate formatter type.
-		if (isset($app['less.formattar']) && !in_array($app['less.formattar'], array('classic', 'compressed'))) {
+		if (isset($app['less.formatter']) && !in_array($app['less.formatter'], array('classic', 'compressed'))) {
 			throw new \Exception("Application['less.formatter'] can be 'classic' or 'compressed'");
 		}
 
