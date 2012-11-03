@@ -4,38 +4,50 @@ namespace FF\ServiceProvider;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 
+/**
+ * Create a LESS service provider to generate CSS file from LESS files
+ */
 class LessServiceProvider implements ServiceProviderInterface
 {
+	/**
+	 * Value for classic CSS generated from LESS source files.
+	 *
+	 * @var string
+	 */
+	const CLASSIC    = 'classic';
+
+	/**
+	 * Value for compressed CSS generated from LESS source files.
+	 *
+	 * @var string
+	 */
+	const COMPRESSED = 'compressed';
+
 	public function register(Application $app)
 	{
 	}
 
 	public function boot(Application $app)
 	{
-		if (!isset($app['less.sources'], $app['less.target'])) {
-			throw new \Exception("Application['less.sources'] and ['less.target'] must be defined");
-		}
+		// Validate this params.
+		$this->validate($app);
 
+		// Define default formatter if not already set.
+		$formatter = isset($app['less.formatter']) ? $app['less.formatter'] : self::CLASSIC;
 		$sources   = $app['less.sources'];
 		$target    = $app['less.target'];
-		$targetDir = dirname($app['less.target']);
-
-		if (!is_writable($targetDir)) {
-			throw new \Exception("Target file directory \"$targetDir\" is not writable");
-		}
 
 		$targetContent   = '';
 		$needToRecompile = false;
 		!is_array($sources) and $sources = array($sources);
+
 		foreach ($sources as $source) {
-			if (!file_exists($source)) {
-				throw new \Exception('Could not find less source dir or file "'.$source.'"');
-			}
 			if (!$needToRecompile) {
 				$needToRecompile = $this->targetNeedsRecompile($source, $target);
 			}
 			if ($needToRecompile) {
 				$handle = new \lessc($source);
+				$handle->setFormatter($formattar);
 				$targetContent .= $handle->parse();
 			}
 		}
@@ -52,6 +64,18 @@ class LessServiceProvider implements ServiceProviderInterface
 		}
 	}
 
+	/**
+	 * Check if is required to recompile LESS file.
+	 *
+	 * @param string $source
+	 *   File to compile (if required)
+	 *
+	 * @param string $target
+	 *   Destination file for parsed LESS
+	 *
+	 * @return bool
+	 *   Indicate fi LESS file must be parsed
+	 */
 	private function targetNeedsRecompile($source, $target)
 	{
 		if (!file_exists($target)) {
@@ -66,6 +90,44 @@ class LessServiceProvider implements ServiceProviderInterface
 				if ($lessFile->getMTime() > $targetMtime) {
 					return true;
 				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Validate application settings.
+	 *
+	 * @param Silex\Application $app
+	 *   Application to validate
+	 *
+	 * @throws \Exception
+	 *   If some params is not valid throw exception.
+	 */
+	private function validate(Application $app) {
+		// Params must be defined.
+		if (!isset($app['less.sources'], $app['less.target'])) {
+			throw new \Exception("Application['less.sources'] and ['less.target'] must be defined");
+		}
+
+		// Destination directory must be writable.
+		$targetDir = dirname($app['less.target']);
+		if (!is_writable($targetDir)) {
+			throw new \Exception("Target file directory \"$targetDir\" is not writable");
+		}
+
+		// Validate formatter type.
+		if (isset($app['less.formattar']) && !in_array($app['less.formattar'], array('classic', 'compressed'))) {
+			throw new \Exception("Application['less.formatter'] can be 'classic' or 'compressed'");
+		}
+
+		// Validate source files.
+		$sources = $app['less.sources'];
+		!is_array($sources) and $sources = array($sources);
+		foreach ($sources as $source) {
+			if (!file_exists($source)) {
+				throw new \Exception('Could not find less source dir or file "'.$source.'"');
 			}
 		}
 	}
