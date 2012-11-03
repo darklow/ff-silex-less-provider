@@ -118,7 +118,7 @@ class LessServiceProvider implements ServiceProviderInterface
 		}
 
 		// Validate formatter type.
-		if (isset($app['less.formatter']) && !in_array($app['less.formatter'], array('classic', 'compressed'))) {
+		if (isset($app['less.formatter']) && !in_array($app['less.formatter'], array(self::FORMATTER_CLASSIC, self::FORMATTER_COMPRESSED))) {
 			throw new \Exception("Application['less.formatter'] can be 'classic' or 'compressed'");
 		}
 
