@@ -6,6 +6,9 @@ use Silex\ServiceProviderInterface;
 
 class LessServiceProvider implements ServiceProviderInterface
 {
+	const CLASSIC    = 'classic';
+	const COMPRESSED = 'compressed';
+
 	public function register(Application $app)
 	{
 	}
@@ -16,6 +19,7 @@ class LessServiceProvider implements ServiceProviderInterface
 			throw new \Exception("Application['less.sources'] and ['less.target'] must be defined");
 		}
 
+		$formatter = isset($app['less.formatter']) ? $app['less.formatter'] : self::CLASSIC;
 		$sources   = $app['less.sources'];
 		$target    = $app['less.target'];
 		$targetDir = dirname($app['less.target']);
@@ -36,6 +40,7 @@ class LessServiceProvider implements ServiceProviderInterface
 			}
 			if ($needToRecompile) {
 				$handle = new \lessc($source);
+				$handle->setFormatter($formattar);
 				$targetContent .= $handle->parse();
 			}
 		}
